@@ -5,36 +5,33 @@ require("dotenv").config();
 
 const app = express();
 
+const emailRoutes = require("./routes/emailRoutes"); // ✅ CONNECT ROUTE
+
 app.use(cors());
 app.use(express.json());
 
+app.use("/", emailRoutes); // ✅ USE ROUTE
+
+app.get("/", (req, res) => {
+  res.send("Server is running 🚀");
+});
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 app.post("/create-order", async (req, res) => {
-  try {
-    const { amount } = req.body;
+  const { amount } = req.body;
 
-    const order = await razorpay.orders.create({
-      amount: amount * 100,
-      currency: "INR",
-      receipt: "receipt_" + Date.now()
-    });
+  const order = await razorpay.orders.create({
+    amount: amount * 100,
+    currency: "INR",
+  });
 
-    res.json(order);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error creating order" }); // JSON response
-  }
-});
-
-app.get("/", (req, res) => {
-  res.send("Server is running successfully 🚀");
+  res.json(order);
 });
 
 app.listen(5000, () => {
-  console.log("Server running on port 5000");
+  console.log("Server running on http://localhost:5000 🚀");
 });

@@ -3,6 +3,9 @@ const Razorpay = require("razorpay");
 const cors = require("cors");
 require("dotenv").config();
 
+
+
+
 const app = express();
 
 const emailRoutes = require("./routes/emailRoutes"); // ✅ CONNECT ROUTE
@@ -22,16 +25,23 @@ const razorpay = new Razorpay({
 });
 
 app.post("/create-order", async (req, res) => {
-  const { amount } = req.body;
+  try {
+    const { amount } = req.body;
+    console.log("Creating order for amount:", amount);
+    console.log("Using Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
 
-  const order = await razorpay.orders.create({
-    amount: amount * 100,
-    currency: "INR",
-  });
+    const order = await razorpay.orders.create({
+      amount: amount * 100, // convert rupees to paise
+      currency: "INR",
+    });
 
-  res.json(order);
+    console.log("Order created:", order);
+    res.json(order);
+  } catch (error) {
+    console.error("Razorpay Error:", error);
+    res.status(500).json(error); // return full error to frontend for debugging
+  }
 });
-
 app.listen(5000, () => {
   console.log("Server running on http://localhost:5000 🚀");
 });
